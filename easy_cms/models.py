@@ -1,7 +1,12 @@
+import hashlib
+
 from jsonfield import JSONField
 from hvad.models import TranslatableModel, TranslatedFields
 
 from django.db import models
+from django.db.models.signals import post_save
+
+from django.core.cache import cache
 from django.contrib.sites.models import Site
 
 
@@ -58,3 +63,28 @@ class Content(TranslatableModel):
                 child.site = self.site
                 child.save()
         super(Content, self).save(*args, **kwargs)
+
+
+def placeholder_post_save(sender, instance, **kwargs):
+    site = Site.objects.get_current()
+    container = Placeholder.objects.get(name=instance.name, site=site)
+
+    for c in container.widget_config:
+
+        cache_enabled = c.get('cache_enabled') or None
+        cache_key_prefix = c.get('cache_key_prefix') or None
+        template_name = c.get('template_name') or None
+        widget_name = c.get('name') or None
+        cache_key = c.get('cache_key') or None
+
+        if cache_enabled:
+            md5 = hashlib.md5()
+            md5.update(cache_key_prefix or '')
+            md5.update(cache_key or widget_name)
+            md5.update(template_name or '')
+            cache_key = md5.hexdigest()
+
+            cache.delete(cache_key)
+
+
+post_save.connect(placeholder_post_save, sender=Placeholder)
