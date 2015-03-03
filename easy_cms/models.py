@@ -71,11 +71,11 @@ def placeholder_post_save(sender, instance, **kwargs):
 
     for c in container.widget_config:
 
-        cache_enabled = c.get('cache_enabled') or None
-        cache_key_prefix = c.get('cache_key_prefix') or None
-        template_name = c.get('template_name') or None
-        widget_name = c.get('name') or None
-        cache_key = c.get('cache_key') or None
+        cache_enabled = c.get('cache_enabled')
+        cache_key_prefix = c.get('cache_key_prefix')
+        template_name = c.get('template_name')
+        widget_name = c.get('name')
+        cache_key = c.get('cache_key')
 
         if cache_enabled:
             md5 = hashlib.md5()
