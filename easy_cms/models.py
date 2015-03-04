@@ -66,11 +66,7 @@ class Content(TranslatableModel):
 
 
 def placeholder_post_save(sender, instance, **kwargs):
-    site = Site.objects.get_current()
-    container = Placeholder.objects.get(name=instance.name, site=site)
-
-    for c in container.widget_config:
-
+    for c in instance.widget_config:
         cache_enabled = c.get('cache_enabled')
         cache_key_prefix = c.get('cache_key_prefix')
         template_name = c.get('template_name')
